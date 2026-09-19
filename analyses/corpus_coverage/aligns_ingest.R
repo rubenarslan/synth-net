@@ -63,11 +63,25 @@ cand <- bind_rows(
          count_ok = is.na(expected) | (abs(n_items - expected) / pmax(expected, 1)) <= 0.25) %>%
   # aligns items are English (zero non-ASCII in the corpus): never file them
   # under a translation record
-  filter(!is_language_variant(Name), !covered, count_ok)
+  filter(!is_language_variant(Name), count_ok)
 
 # manual review exclusions: version mis-assignments that pass the count gate
 # (12-item GHQ under the GHQ-28 record; adult STAI state form under STAI-for-Children)
 BAD_DOI <- c("10.1037/t16058-000", "10.1037/t06497-000")
+
+# full gated match set, regardless of coverage by other tiers (for
+# coverage_by_source.R, which reports overlapping coverage per source)
+cand %>%
+  filter(!DOI %in% BAD_DOI) %>%
+  group_by(meta_instrument_name) %>%
+  filter(mtype == ifelse(any(mtype == "exact"), "exact", "core")) %>%
+  slice_max(usage_count, n = 1, with_ties = FALSE) %>% ungroup() %>%
+  group_by(DOI) %>% slice_max(n_items, n = 1, with_ties = FALSE) %>% ungroup() %>%
+  transmute(DOI, Name, meta_instrument_name, n_items, usage_count, mtype,
+            covered_synthnet, covered_hunt = DOI %in% hunt_dois, covered_semnet = DOI %in% semnet_dois) %>%
+  write.csv("data/processed/aligns_matches_all.csv", row.names = FALSE)
+
+cand <- cand %>% filter(!covered)
 
 # exact matches beat core matches; then one best DOI per instrument (highest usage),
 # one instrument per DOI (most items)

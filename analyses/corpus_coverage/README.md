@@ -4,15 +4,26 @@ How much of the APA PsycTests universe (weighted by how often each test is used
 in the PsycInfo literature) does the SynthNet search corpus cover, and how far
 do three additional item-text sources push that coverage?
 
-| Tier | Source | Records added | Usage share |
-|---|---|---|---|
-| synthnet | Björn's extractions (`raw-extractions-exploded.parquet`, bucket `scaled`) | 13,532 | 37.1 % |
-| hunt | web scale hunt for the 156 most-used missing instruments (`scale_hunt_*`) | 132 | 28.5 % |
-| semanticnet | SemanticNet item database (Rosenbusch et al.), `semanticnet_*` | 136 | 0.9 % |
-| aligns | Larsen/aligns corpus curated from public repositories (NIH HEAL, Catalogue of Mental Health Measures, SOBC, Stress Measurement Network, PROMIS), `aligns_ingest.R` | 29 | 1.5 % |
-| missing | | 17,315 | 32.0 % |
+PsycTests has 71,692 records; PsycInfo usage counts exist for the 31,144 that
+have been cited at least once, and the usage-weighted share is over those.
+"Overlapping" counts every record a source can cover, whether or not another
+source already covers it; "incremental" counts what each source adds on top of
+the tiers before it (synthnet > hunt > semanticnet > aligns), which is what the
+treemap colours. From `coverage_by_source.R`:
 
-Pooled: 13,829 of 31,144 PsycTests records, 68.0 % of usage (`scale_hunt_treemap.R`).
+| Source | Records (of 71,692), overlapping | Usage share, overlapping | Records, incremental | Usage share, incremental |
+|---|---|---|---|---|
+| synthnet: Björn's extractions (`raw-extractions-exploded.parquet`, bucket `scaled`) | 32,223 (44.9 %) | 37.1 % | 32,223 | 37.1 % |
+| hunt: web scale hunt for the 156 most-used missing instruments (`scale_hunt_*`) | 132 | 28.5 % | 132 | 28.5 % |
+| semanticnet: SemanticNet item database (Rosenbusch et al.), `semanticnet_*` | 476 | 13.3 % | 186 | 0.9 % |
+| aligns: Larsen/aligns corpus from public repositories (NIH HEAL, Catalogue of Mental Health Measures, SOBC, Stress Measurement Network, PROMIS), `aligns_ingest.R` | 125 | 13.7 % | 47 | 1.5 % |
+| any source | 32,588 (45.5 %) | 68.0 % | 32,588 | 68.0 % |
+
+SemanticNet and aligns mostly re-cover what SynthNet and the hunt already
+have; their incremental contribution is small, their overlapping coverage is
+not. The overlapping match sets are `data/processed/semanticnet_matches_all.csv`
+and `aligns_matches_all.csv` (written by the ingests before their
+"not yet covered" filter); `data/processed/coverage_by_source.csv` holds the table.
 
 ![Coverage by source](figures/treemap_coverage_sources.png)
 
@@ -32,7 +43,8 @@ python3 semanticnet_match.py       # re-key data/semanticnet/scale_matches.csv t
 Rscript semanticnet_ingest.R       # -> data/semanticnet/semanticnet-extractions-exploded.parquet
 Rscript aligns_ingest.R            # -> data/aligns/aligns-extractions-exploded.parquet
 Rscript dedupe_fill_tiers.R        # content-dedupe the three fill parquets IN PLACE, writes alias table
-Rscript scale_hunt_treemap.R       # coverage table + figures/treemap_coverage_{sources,all}.{png,html}
+Rscript scale_hunt_treemap.R       # incremental coverage table + figures/treemap_coverage_{sources,all}.{png,html}
+Rscript coverage_by_source.R       # overlapping vs incremental coverage per source, both denominators
 Rscript -e "rmarkdown::render('coverage_synthnet.Rmd')"   # full report incl. figures/treemap_coverage.png
 ```
 
@@ -66,7 +78,8 @@ the raw aligns corpus into `data/aligns/larsen_instruments.csv` (shipped here).
   as PHQ-9 inside PHQ stay). Aliases (dropped DOI to kept DOI) go to
   `data/processed/fill_tier_dedupe_aliases.csv`; aliased DOIs still count as
   covered in the treemap. Destructive: regenerate the parquets before re-running.
-- `scale_hunt_treemap.R`: coverage by tier and the treemaps.
+- `coverage_by_source.R`: the coverage table above (overlapping and incremental, record and usage denominators).
+- `scale_hunt_treemap.R`: incremental coverage by tier and the treemaps.
   `treemap_functions.R` holds the plotly treemap helper (vendored from
   `rubenarslan/construct_proliferation`), `data/palette.rds` the colours.
 - `coverage_synthnet.Rmd`: the full report (coverage by test count, usage,
@@ -89,7 +102,8 @@ Committed (no item text, no PsycTests fields beyond name/DOI/link):
   `scale_hunt_pilot*.csv`, `scale_hunt_check_report.csv` the pilot and checker
   reports.
 - `data/processed/{semanticnet,aligns}_ingested.csv`: which PsycTests records
-  each tier filled; `semanticnet_fillable_beyond_targets.csv` the wider
+  each tier filled; `{semanticnet,aligns}_matches_all.csv` the full gated match
+  sets regardless of prior coverage; `coverage_by_source.csv` the coverage table; `semanticnet_fillable_beyond_targets.csv` the wider
   potential; `fill_tier_dedupe_aliases.csv` the dedupe aliases;
   `larsen_psyctests_matches.csv` the aligns name to DOI mapping;
   `synthnet_top200_missing_scaled.csv` the most-used missing tests.

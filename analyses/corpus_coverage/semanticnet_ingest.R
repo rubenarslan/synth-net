@@ -36,7 +36,18 @@ cand <- m %>% separate_rows(dois, sep = ";") %>% rename(DOI = dois) %>%
          count_ok = is.na(expected) | (abs(n_items - expected) / pmax(expected, 1)) <= 0.25,
          uncovered = !covered_synthnet & !(DOI %in% hunt_dois)) %>%
   # SemanticNet items are English: never file them under a translation record
-  filter(!is_language_variant(Name), uncovered, name_safe, count_ok)
+  filter(!is_language_variant(Name), name_safe, count_ok)
+
+# full gated match set, regardless of coverage by other tiers (for
+# coverage_by_source.R, which reports overlapping coverage per source)
+cand %>%
+  group_by(semanticnet_scale) %>% slice_max(usage_count, n = 1, with_ties = FALSE) %>% ungroup() %>%
+  group_by(DOI) %>% slice_max(n_items, n = 1, with_ties = FALSE) %>% ungroup() %>%
+  transmute(DOI, Name, semanticnet_scale, n_items, usage_count, match_type,
+            covered_synthnet, covered_hunt = DOI %in% hunt_dois) %>%
+  write.csv("data/processed/semanticnet_matches_all.csv", row.names = FALSE)
+
+cand <- cand %>% filter(uncovered)
 
 # one best PsycTests record per semanticnet scale; one semanticnet scale per DOI
 fills <- cand %>%
