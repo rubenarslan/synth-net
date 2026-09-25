@@ -46,6 +46,7 @@ Rscript dedupe_fill_tiers.R        # content-dedupe the three fill parquets IN P
 Rscript scale_hunt_treemap.R       # incremental coverage table + figures/treemap_coverage_{sources,all}.{png,html}
 Rscript coverage_by_source.R       # overlapping vs incremental coverage per source, both denominators
 Rscript -e "rmarkdown::render('coverage_synthnet.Rmd')"   # full report incl. figures/treemap_coverage.png
+Rscript -e "rmarkdown::render('descriptives_for_revision.Rmd')"   # items per instrument / per scale -> data/processed/descriptives_items_per_scale.csv
 ```
 
 `scale_hunt_check.py <workflow_output.json>` is the deterministic verbatim
@@ -84,6 +85,9 @@ the raw aligns corpus into `data/aligns/larsen_instruments.csv` (shipped here).
   `rubenarslan/construct_proliferation`), `data/palette.rds` the colours.
 - `coverage_synthnet.Rmd`: the full report (coverage by test count, usage,
   instrument type and year; top missing tests; treemaps).
+- `descriptives_for_revision.Rmd`: corpus descriptives for the manuscript revision,
+  currently items per instrument and per scale node (own items, and including
+  subscales) by tier; table in `data/processed/descriptives_items_per_scale.csv`.
 
 ## Inputs
 
