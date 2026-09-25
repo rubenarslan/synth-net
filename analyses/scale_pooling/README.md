@@ -43,6 +43,9 @@ cost about .10 in r.
 - `run_pooling_comparison.py`: accuracy and retrieval comparison of all variants.
 - `keying_noise_simulation.py`: robustness of each variant to corrupted keying.
 - `documented_keying_noise_validation.py`: minimal demo, documented pooling only.
+- `threshold_evaluation.py`: precision, recall and calibration of a display threshold on
+  cross-instrument pairs (variant B), from the pair predictions.
+- `supplementary_note_pooling.md`: write-up of S1 to S3 for the manuscript supplement.
 - `data/`: SurveyBot3000 validation data (item embeddings, respondent data,
   item to scale mapping with keying, empirical scale correlations) copied from
   `github.com/rubenarslan/surveybot3000` (`data/intermediate/`) and the
@@ -57,6 +60,7 @@ pip install -r requirements.txt
 python run_pooling_comparison.py            # ~1 min
 python keying_noise_simulation.py           # ~1 min
 python documented_keying_noise_validation.py
+python threshold_evaluation.py
 ```
 
 Notes: the pilot dataset's "documented" keying was itself derived from the
