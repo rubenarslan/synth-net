@@ -49,6 +49,10 @@ Rscript -e "rmarkdown::render('coverage_synthnet.Rmd')"   # full report incl. fi
 Rscript -e "rmarkdown::render('descriptives_for_revision.Rmd')"   # items per instrument / per scale -> data/processed/descriptives_items_per_scale.csv
 ```
 
+The hunt procedure (models, agent prompts, tool budgets, verification, batch
+history) is documented in `scale_hunt_procedure.md`; the two workflow scripts
+are archived verbatim in `scale_hunt_workflows/`.
+
 `scale_hunt_check.py <workflow_output.json>` is the deterministic verbatim
 checker for hunt extractions against the archived source PDFs (needs the
 `pdf_inspector` package and the PDFs in `data/restricted/pdfs/`).
